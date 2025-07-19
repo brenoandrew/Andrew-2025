@@ -1,0 +1,63 @@
+---
+import Card from "./Card/index.astro";
+import Button from "./Button.astro";
+import { LINKS } from "../lib/constants";
+import { Icon } from 'astro-icon/components'
+import Tooltip from "./Tooltip/index";
+import { Image } from "astro:assets";
+---
+
+<Card colSpan="md:col-span-3" rowSpan="md:row-span-4">
+  <div class="flex w-full h-full">
+    <div class="flex flex-col justify-between md:max-h-[300px] gap-4">
+      <div class="flex flex-col h-full">
+        <h6 class="text-sm font-light m-0 text-gray-500">welcome</h6>
+        <p class="m-0 font-light text-xl">
+          Hi, I'm <b class="font-bold">Andrew Henrice</b>, a software
+          developer and CEO & Founder of <a
+            class="text-primary-300"
+            href="https://dawnwebs.com"
+            target="_blank"
+          >
+            Dawn Labs & Dawn Web 
+          </a>
+        </p>
+      </div>
+      <div class="flex gap-4">
+        <a aria-label="github profile" href={LINKS.github} target="_blank">
+          <Button aria-label="github profile">
+            <Icon class="h-6" name="ri:github-fill" />
+            <span class="sr-only">GitHub Profile</span>
+          </Button>
+        </a>
+        <a aria-label="linkedin profile" href={LINKS.linkedin} target="_blank">
+          <Button aria-label="linkedin profile">
+            <Icon class="h-6" name="ri:linkedin-box-fill" />
+            <span class="sr-only">Linkedin Profile</span>
+          </Button>
+        </a>
+        <a aria-label="Instagram profile" href={LINKS.instagram} target="_blank">
+          <Button aria-label="Instagram profile">
+            <Icon class="h-6" name="ri:instagram-fill" />
+            <span class="sr-only">Instagram Profile</span>
+          </Button>
+        </a>
+        <a aria-label="Twitter profile" href={LINKS.twitter} target="_blank">
+          <Button aria-label="Twitter profile">
+            <Icon class="h-6" name="ri:twitter-fill" />
+            <span class="sr-only">Twitter Profile</span>
+          </Button>
+        </a>
+        <Tooltip client:visible>
+          <Button aria-label="easter egg btn">
+            <Icon class="h-6" name="ri:emotion-laugh-line" />
+            <span class="sr-only">Easter egg button</span>
+          </Button>
+        </Tooltip>
+      </div>
+    </div>
+    <Image
+      alt="memoji of gianmarco"       class="rounded-xl	object-cover w-auto max-h-[300px] select-none absolute right-[-110px] bottom-[-20px] z-[-1] opacity-50 md:opacity-100 md:relative md:right-auto md:bottom-auto md:z-auto pointer-events-none"       height="800"       src="/Andrew2.png"       width="800"
+    />
+  </div>
+</Card>
