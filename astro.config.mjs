@@ -29,7 +29,7 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [remarkReadingTime],
   },
-  output: "server",
+  output: "static",
   adapter: netlify({ edgeMiddleware: true }),
   vite: {
     assetsInclude: "**/*.riv",
