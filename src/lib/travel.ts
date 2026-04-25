@@ -1,0 +1,18 @@
+export const visitedCountries = [
+  "Brazil",
+  "France",
+  "China",
+  "Italy",
+  "South Korea",
+  "Ethiopia",
+  "Angola",
+  "Spain",
+  "Portugal",
+  "Thailand",
+  "Paraguay",
+  "Czech Republic",
+  "Philippines",
+  "Japan",
+  "Germany",
+  "Qatar",
+];

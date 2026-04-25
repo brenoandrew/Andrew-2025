@@ -1,105 +1,945 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Card from "../components/Card/index.astro";
-import IntroCard from "../components/IntroCard.astro";
-import ContactsCard from "../components/ContactsCard.astro";
-import TimeZone from "../components/TimeZoneCard.astro";
-import AboutMe from "../components/AboutMe.astro";
-import Now from "../components/Now.astro";
-import Globe from "../components/Globe";
+import SiteNav from "../components/SiteNav.astro";
 import { getCollection } from "astro:content";
+import { hasTripPhotos } from "../lib/photography";
+import { featuredProjects } from "../lib/projects";
+import { profile } from "../lib/profile";
+import { visitedCountries } from "../lib/travel";
 import { formatDate } from "../lib/helpers";
 
-const posts = (await getCollection("blog"))?.sort(
+const posts = (await getCollection("blog")).sort(
   (blogEntryA, blogEntryB) =>
     (blogEntryB.data.pubDate || new Date()).getTime() -
     (blogEntryA.data.pubDate || new Date()).getTime()
 );
+
+const latestPosts = posts.slice(0, 3);
+const featuredProject = featuredProjects[0];
+
+const workCards = [
+  {
+    title: featuredProject.title,
+    label: featuredProject.label || "Studio",
+    href: featuredProject.href,
+    image: featuredProject.image || "/portfolio/work-abstract-01.png",
+    external: true,
+  },
+  {
+    title: "Travel Atlas",
+    label: "Interactive",
+    href: "/travel",
+    image: "/portfolio/work-abstract-02.png",
+  },
+  {
+    title: "Road Photography",
+    label: "Gallery",
+    href: "/photography",
+    image: "/portfolio/work-abstract-03.png",
+  },
+];
+
+const journeyRows = [
+  {
+    title: "Dawn Labs & Dawn Web",
+    detail: "Founder-led product studio for useful web experiences.",
+    year: "Now",
+    tags: ["Product", "Web"],
+    href: featuredProject.href,
+    external: true,
+  },
+  {
+    title: `${visitedCountries.length} countries visited`,
+    detail: "A rotating globe and visual archive of places that shaped the work.",
+    year: "Ongoing",
+    tags: ["Travel", "Map"],
+    href: "/travel",
+  },
+  {
+    title: "Photography archive",
+    detail: hasTripPhotos
+      ? "Selected images from the road, organized as a growing gallery."
+      : "A gallery structure ready for the first trip photo drop.",
+    year: "Open",
+    tags: ["Light", "Places"],
+    href: "/photography",
+  },
+  {
+    title: "Notes from the build",
+    detail: "Writing on software, business, travel, and ideas that keep returning.",
+    year: "Journal",
+    tags: ["Writing", "Ideas"],
+    href: "/blog",
+  },
+];
+
+const insightCards = latestPosts.length
+  ? latestPosts.map((post, index) => ({
+      title: post.data.title,
+      description: post.data.description || "A short note from the build.",
+      href: `/blog/${post.id}`,
+      date: post.data.pubDate ? formatDate(post.data.pubDate) : "Latest",
+      image: `/portfolio/insight-abstract-0${(index % 3) + 1}.png`,
+    }))
+  : [
+      {
+        title: "Designing from motion and memory",
+        description: "How travel, product craft, and small observations feed the work.",
+        href: "/blog",
+        date: "Soon",
+        image: "/portfolio/insight-abstract-01.png",
+      },
+    ];
 ---
 
-<script>
-  import { stagger, animate, type AnimationSequence } from "motion";
-  import { loaderAnimation } from "../lib/constants";
-  const cards = document.querySelectorAll(".card");
-
-  const sequence = [
-    loaderAnimation,
-    [
-      cards,
-      { y: ["40%", "0%"], opacity: [0, 1] },
-      {
-        type: "spring",
-        at: "-0.1",
-        delay: stagger(0.3),
-      },
-    ],
-  ];
-
-  animate(sequence as AnimationSequence);
-</script>
-
-<Layout
-  description="I'm a developer based in Korea, passionate about user experience and specializing in engaging animations and micro-interactions. My primary tools of choice include: JavaScript, React, Solid.js, Astro, Svelte, and Node.js."
-  title="Andrew Henrice - Software Developer"
->
-  <main
-    class="text-white m-auto p-2 grid gap-2 max-w-6xl overflow-hidden relative w-full sm:p-4 sm:gap-2 md:grid-cols-2 md:gap-3 md:p-6 lg:h-screen lg:grid-rows-8 lg:grid-cols-4 lg:gap-4 lg:max-h-[800px]"
-  >
-    <IntroCard />
-    <AboutMe />
-    <ContactsCard />
-    <TimeZone />
-    <Now />
-    <Card
-      colorText="text-neutral-900"
-      colSpan="md:col-span-1"
-      href="travel"
-      rowSpan="md:row-span-1"
-      title="Countries I visited"
-    >
-      <div class="h-full w-full absolute inset-0 -z-10">
-        <Globe client:load />
+<Layout description={profile.description} title="Andrew Henrice - Personal Website">
+  <SiteNav />
+  <main id="content">
+    <section class="hero-section" aria-labelledby="hero-title">
+      <div class="hero-stage">
+        <div class="side-label">Portfolio</div>
+        <div class="hero-stats" aria-label="Portfolio stats">
+          <span><strong>+200</strong> Projects explored</span>
+          <span><strong>+50</strong> Ideas shipped</span>
+        </div>
+        <div class="hero-copy">
+          <h1 id="hero-title">Hello</h1>
+          <p>I am {profile.name}, a developer and founder building web products with a traveler's eye.</p>
+        </div>
+        <a class="scroll-cue" href="#about">Scroll down</a>
+        <img
+          alt="Black-and-white portrait of Andrew Henrice"
+          class="hero-portrait"
+          decoding="async"
+          fetchpriority="high"
+          height="478"
+          src="/me.png"
+          width="478"
+        />
       </div>
-    </Card>
-    <Card
-      colSpan="md:col-span-1"
-      href="/blog"
-      rowSpan="md:row-span-2 flex gap-1"
-      title="Blog"
-    >
-      <div class="flex flex-col gap-1">
-        {
-          posts?.slice(0, 3).map((post) => (
-            // <a
-            //   class="text-sm md:text-base decoration-none flex justify-between"
-            //   href={`/blog/${post.id}`}
-            // >
-            <div class="list-none w-full text-neutral-100 hover:text-neutral-400 ease-in-out transition-colors border-b-neutral-400 border-dashed border-b-1 my-0">
-              <p class="inline-block whitespace-nowrap text-xs">
-                {post.data.title}
-              </p>
-              {post.data.pubDate && (
-                <time
-                  class="text-right tabular-nums text-xs"
-                  data-date={post.data.pubDate.toISOString()}
-                  datetime={post.data.pubDate.toISOString()}
-                >
-                  {formatDate(post.data.pubDate)}
-                </time>
-              )}
-            </div>
-            // </a>
-          ))
-        }
+    </section>
+
+    <section class="about-section" id="about" aria-labelledby="about-title">
+      <div class="about-copy">
+        <p class="kicker">About Me</p>
+        <h2 id="about-title">A developer with a restless passport.</h2>
+        <p>
+          I am a Brazilian software engineer based in South Korea, focused on
+          clear interfaces, useful products, and the small details that make
+          digital work feel human.
+        </p>
       </div>
-    </Card>
-    <Card colSpan="md:col-span-1" rowSpan="md:row-span-1">
-      <p class="text-xs">
-        © 2025 · Crafted with ♥️ using <a
-          class="text-red-500"
-          href="https://astro.build/"
-          target="_blank">Astro</a>
+      <div class="about-cards">
+        <article class="metric-card">
+          <span class="seal">AH</span>
+          <strong>120%</strong>
+          <p>Energy for projects that need taste, speed, and a clear point of view.</p>
+        </article>
+        <article class="portrait-card">
+          <img alt="Andrew Henrice portrait" height="478" loading="lazy" src="/me.png" width="478" />
+        </article>
+        <div class="note-stack">
+          <p><span></span> Building Dawn Labs & Dawn Web around practical, polished web experiences.</p>
+          <p><span></span> Keeping photography, writing, astronomy, and football close enough to shape the work.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="work-strip" id="work" aria-label="Featured work">
+      {workCards.map((card) => (
+        <a
+          class="work-card"
+          href={card.href}
+          rel={card.external ? "noopener noreferrer" : undefined}
+          target={card.external ? "_blank" : undefined}
+        >
+          <img alt="" height="1024" loading="lazy" src={card.image} width="1536" />
+          <span class="card-action" aria-hidden="true">&nearr;</span>
+          <p>{card.title}</p>
+          <small>{card.label}</small>
+        </a>
+      ))}
+    </section>
+
+    <section class="journey-section" aria-labelledby="journey-title">
+      <div class="section-header">
+        <p class="kicker">Experience</p>
+        <h2 id="journey-title">Explore My Design Journey</h2>
+      </div>
+      <div class="journey-copy">
+        <p>
+          One portfolio thread, from shipped products to moving maps and visual
+          notes from the road.
+        </p>
+        <a href="/contact">Book a call</a>
+      </div>
+      <div class="journey-list">
+        {journeyRows.map((row) => (
+          <a
+            class="journey-row"
+            href={row.href}
+            rel={row.external ? "noopener noreferrer" : undefined}
+            target={row.external ? "_blank" : undefined}
+          >
+            <span class="row-title">{row.title}</span>
+            <span class="row-detail">{row.detail}</span>
+            <span class="row-tags">{row.tags.map((tag) => <em>{tag}</em>)}</span>
+            <strong>{row.year}</strong>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="dark-cta" aria-labelledby="cta-title">
+      <img alt="" height="1024" loading="lazy" src="/portfolio/cta-dark-desk.png" width="1536" />
+      <div>
+        <p class="kicker">Available for selected work</p>
+        <h2 id="cta-title">Exclusive Winter Deal Days Get a Free Consultation!</h2>
+        <a href="/contact">Let's talk</a>
+      </div>
+    </section>
+
+    <section class="latest-section" aria-labelledby="latest-title">
+      <div class="center-header">
+        <p class="kicker">Portfolio</p>
+        <h2 id="latest-title">Latest Works</h2>
+      </div>
+      <div class="latest-grid">
+        {workCards.map((card) => (
+          <a
+            class="latest-card"
+            href={card.href}
+            rel={card.external ? "noopener noreferrer" : undefined}
+            target={card.external ? "_blank" : undefined}
+          >
+            <img alt="" height="1024" loading="lazy" src={card.image} width="1536" />
+            <span>{card.title}</span>
+          </a>
+        ))}
+      </div>
+      <a class="center-link" href="#work">Check out more</a>
+    </section>
+
+    <section class="insights-section" aria-labelledby="insights-title">
+      <div class="center-header">
+        <p class="kicker">Blog</p>
+        <h2 id="insights-title">Design Insights & Trends</h2>
+      </div>
+      <div class="insight-grid">
+        {insightCards.map((card) => (
+          <a class="insight-card" href={card.href}>
+            <img alt="" height="1024" loading="lazy" src={card.image} width="1536" />
+            <small>{card.date}</small>
+            <strong>{card.title}</strong>
+            <p>{card.description}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="final-cta" aria-labelledby="final-title">
+      <h2 id="final-title">Got a Vision? Let's Bring It to Life!</h2>
+      <p>
+        Whether it is a product, portfolio, travel idea, or visual archive, I
+        can help shape the next version.
       </p>
-    </Card>
+      <a href={profile.emailHref}>Reach out</a>
+    </section>
   </main>
 </Layout>
+
+<style>
+  main {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .hero-section,
+  .about-section,
+  .work-strip,
+  .journey-section,
+  .dark-cta,
+  .latest-section,
+  .insights-section,
+  .final-cta {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    width: 100%;
+  }
+
+  .kicker {
+    color: var(--ink);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .hero-section {
+    padding-top: clamp(3rem, 7vw, 6rem);
+  }
+
+  .hero-stage {
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 1.5rem clamp(1rem, 5vw, 4rem);
+    grid-template-columns: 3rem minmax(0, 1fr) minmax(16rem, 0.9fr);
+    grid-template-rows: auto 1fr auto;
+    min-height: min(720px, calc(100svh - 5rem));
+    overflow: hidden;
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+    position: relative;
+  }
+
+  .side-label {
+    align-self: start;
+    border-left: 1px solid var(--line);
+    color: var(--ink-muted);
+    font-size: 0.68rem;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    min-height: 45%;
+    padding-left: 0.55rem;
+    writing-mode: vertical-rl;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: clamp(1rem, 5vw, 3rem);
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .hero-stats span {
+    color: var(--ink-muted);
+    display: grid;
+    font-size: clamp(0.58rem, 1.2vw, 0.82rem);
+  }
+
+  .hero-stats strong {
+    color: var(--ink);
+    font-family: "CabinetGrotesk", sans-serif;
+    font-size: clamp(1.05rem, 3vw, 1.75rem);
+    font-weight: 500;
+  }
+
+  .hero-copy {
+    align-self: center;
+    grid-column: 2;
+    grid-row: 2;
+    max-width: 32rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(5rem, 15vw, 12rem);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 0.78;
+    margin: 0;
+  }
+
+  .hero-copy p {
+    color: var(--ink-muted);
+    font-size: clamp(0.75rem, 1.8vw, 1rem);
+    margin: 0.75rem 0 0 0.35rem;
+    max-width: 24rem;
+  }
+
+  .hero-portrait {
+    bottom: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 50%;
+    position: absolute;
+    right: -1.5%;
+    top: 0;
+    filter: grayscale(1) var(--media-filter);
+    width: 51%;
+    z-index: 1;
+  }
+
+  .scroll-cue {
+    align-self: end;
+    color: var(--ink);
+    font-size: 0.72rem;
+    grid-column: 2;
+    grid-row: 3;
+    text-decoration: none;
+    width: max-content;
+  }
+
+  .about-section {
+    align-items: start;
+    display: grid;
+    gap: 3rem;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+    padding-top: 4rem;
+  }
+
+  .about-copy h2,
+  .section-header h2,
+  .center-header h2,
+  .final-cta h2 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 500;
+    line-height: 0.95;
+    margin: 0.65rem 0 0;
+  }
+
+  .about-copy p:not(.kicker),
+  .journey-copy p,
+  .final-cta p {
+    color: var(--ink-muted);
+    font-size: 1rem;
+    line-height: 1.65;
+    margin: 1.1rem 0 0;
+    max-width: 36rem;
+  }
+
+  .about-cards {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  }
+
+  .metric-card,
+  .portrait-card,
+  .note-stack {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  .metric-card {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem;
+  }
+
+  .seal {
+    align-items: center;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 800;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
+  }
+
+  .metric-card strong {
+    font-family: "CabinetGrotesk", sans-serif;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  .metric-card p,
+  .note-stack p {
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .portrait-card {
+    overflow: hidden;
+  }
+
+  .portrait-card img {
+    display: block;
+    filter: grayscale(1) var(--media-filter);
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .note-stack {
+    display: grid;
+    gap: 1rem;
+    grid-column: 1 / -1;
+    padding: 1rem;
+  }
+
+  .note-stack p {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+  }
+
+  .note-stack span {
+    background: var(--ink);
+    border-radius: 999px;
+    height: 0.65rem;
+    margin-top: 0.35rem;
+    width: 0.65rem;
+  }
+
+  .work-strip {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-top: 3rem;
+  }
+
+  .work-card,
+  .latest-card,
+  .insight-card {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .work-card {
+    min-width: 0;
+    position: relative;
+  }
+
+  .work-card img,
+  .latest-card img,
+  .insight-card img {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    display: block;
+    filter: var(--media-filter);
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .card-action {
+    align-items: center;
+    background: var(--ink);
+    border-radius: 999px;
+    color: var(--on-ink);
+    display: inline-flex;
+    font-size: 1.1rem;
+    height: 3.2rem;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    width: 3.2rem;
+  }
+
+  .work-card p,
+  .latest-card span {
+    font-size: 0.92rem;
+    font-weight: 800;
+    margin: 0.65rem 0 0;
+  }
+
+  .work-card small {
+    color: var(--ink-muted);
+    display: block;
+    font-size: 0.78rem;
+    margin-top: 0.18rem;
+  }
+
+  .journey-section {
+    display: grid;
+    gap: 1.5rem 3rem;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    padding-top: 5rem;
+  }
+
+  .journey-copy {
+    align-self: end;
+  }
+
+  .journey-copy a,
+  .final-cta a,
+  .dark-cta a,
+  .center-link {
+    border-bottom: 1px solid currentColor;
+    color: var(--ink);
+    display: inline-flex;
+    font-size: 0.84rem;
+    font-weight: 800;
+    margin-top: 1rem;
+    text-decoration: none;
+  }
+
+  .journey-list {
+    border-top: 1px solid var(--line);
+    grid-column: 1 / -1;
+  }
+
+  .journey-row {
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1.05fr 1.3fr auto auto;
+    padding: 1rem 0;
+    text-decoration: none;
+  }
+
+  .row-title {
+    font-weight: 900;
+  }
+
+  .row-detail {
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .row-tags {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .row-tags em {
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-style: normal;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .journey-row strong {
+    background: var(--ink);
+    border-radius: 999px;
+    color: var(--on-ink);
+    font-size: 0.72rem;
+    padding: 0.28rem 0.55rem;
+  }
+
+  .dark-cta {
+    margin-top: 5rem;
+    position: relative;
+  }
+
+  .dark-cta img {
+    aspect-ratio: 4 / 1.35;
+    border-radius: var(--radius);
+    display: block;
+    filter: grayscale(1) brightness(0.38);
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .dark-cta div {
+    color: var(--inverse-ink);
+    left: 50%;
+    max-width: 44rem;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 3rem);
+  }
+
+  .dark-cta .kicker {
+    color: var(--inverse-ink);
+  }
+
+  .dark-cta h2 {
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    line-height: 0.95;
+    margin: 0.4rem 0 0;
+  }
+
+  .dark-cta a {
+    color: var(--inverse-ink);
+  }
+
+  .latest-section,
+  .insights-section {
+    background: var(--paper-soft);
+    margin-top: 4rem;
+    max-width: none;
+    padding-bottom: 4rem;
+    padding-left: max(1rem, calc((100vw - 72rem) / 2));
+    padding-right: max(1rem, calc((100vw - 72rem) / 2));
+    padding-top: 4rem;
+  }
+
+  .insights-section {
+    background: var(--paper);
+    margin-top: 0;
+  }
+
+  .center-header {
+    text-align: center;
+  }
+
+  .latest-grid,
+  .insight-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 2rem;
+  }
+
+  .latest-card,
+  .insight-card {
+    min-width: 0;
+  }
+
+  .center-link {
+    margin-left: auto;
+    margin-right: auto;
+    width: max-content;
+  }
+
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    display: grid;
+    padding: 0.65rem;
+  }
+
+  .insight-card small {
+    background: var(--ink);
+    border-radius: 999px;
+    color: var(--on-ink);
+    font-size: 0.68rem;
+    justify-self: start;
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .insight-card strong {
+    font-size: 0.98rem;
+    line-height: 1.15;
+    margin-top: 0.55rem;
+  }
+
+  .insight-card p {
+    color: var(--ink-muted);
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 0.45rem 0 0;
+  }
+
+  .final-cta {
+    padding-bottom: 2rem;
+    padding-top: 4rem;
+    text-align: center;
+  }
+
+  .final-cta p {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 38rem;
+  }
+
+  @media (max-width: 860px) {
+    .about-section,
+    .journey-section {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-portrait {
+      opacity: 0.78;
+      right: -8%;
+      top: 0;
+      height: 100%;
+      width: 62%;
+    }
+
+    .journey-row {
+      align-items: start;
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .hero-section,
+    .about-section,
+    .work-strip,
+    .journey-section,
+    .dark-cta,
+    .final-cta {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .hero-section {
+      padding-top: 1.5rem;
+    }
+
+    .hero-stage {
+      gap: 1rem;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: min(35rem, calc(100svh - 4rem));
+      padding-bottom: 1.25rem;
+    }
+
+    .hero-stats {
+      gap: 1.1rem;
+      grid-column: 1;
+      grid-row: 2;
+      padding-left: 0;
+    }
+
+    .hero-stats strong {
+      font-size: 1.55rem;
+    }
+
+    .side-label {
+      align-items: center;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+      display: inline-flex;
+      grid-column: 1;
+      grid-row: 1;
+      min-height: 0;
+      padding-left: 0;
+      padding-top: 0.7rem;
+      writing-mode: horizontal-tb;
+    }
+
+    .hero-copy {
+      align-self: start;
+      grid-column: 1;
+      grid-row: 3;
+      margin-top: 0.65rem;
+      max-width: 15rem;
+    }
+
+    .hero-copy h1 {
+      font-size: 4.65rem;
+    }
+
+    .hero-copy p {
+      max-width: 13.5rem;
+    }
+
+    .hero-portrait {
+      bottom: 0;
+      height: 38%;
+      object-position: 50% 46%;
+      opacity: 0.9;
+      right: -10%;
+      top: auto;
+      width: 72%;
+    }
+
+    .scroll-cue {
+      grid-column: 1;
+      grid-row: 4;
+      min-height: 2.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .work-strip,
+    .latest-grid,
+    .insight-grid,
+    .about-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .about-section {
+      gap: 1.5rem;
+      padding-top: 2.5rem;
+    }
+
+    .work-strip {
+      gap: 1.5rem;
+      padding-top: 2.25rem;
+    }
+
+    .journey-section {
+      gap: 1.25rem;
+      padding-top: 3.25rem;
+    }
+
+    .dark-cta {
+      margin-top: 3.25rem;
+    }
+
+    .latest-section,
+    .insights-section {
+      margin-top: 3.25rem;
+      padding: 3rem 1rem;
+    }
+
+    .insights-section {
+      margin-top: 0;
+    }
+
+    .latest-grid,
+    .insight-grid {
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .about-copy p:not(.kicker),
+    .journey-copy p,
+    .final-cta p,
+    .metric-card p,
+    .note-stack p {
+      max-width: none;
+    }
+
+    .metric-card,
+    .portrait-card,
+    .note-stack,
+    .work-card,
+    .latest-card,
+    .insight-card {
+      max-width: none;
+      width: 100%;
+    }
+
+    .metric-card,
+    .note-stack,
+    .insight-card {
+      padding: 1rem;
+    }
+
+    .portrait-card img {
+      aspect-ratio: 1 / 0.9;
+      height: auto;
+    }
+
+    .card-action {
+      height: 3rem;
+      width: 3rem;
+    }
+
+    .journey-row {
+      gap: 0.75rem;
+      padding: 1rem 0;
+    }
+
+    .row-tags {
+      flex-wrap: wrap;
+    }
+
+    .journey-row strong {
+      justify-self: start;
+    }
+
+    .dark-cta img {
+      aspect-ratio: 1 / 0.9;
+    }
+
+    .dark-cta h2 {
+      font-size: 1.5rem;
+    }
+
+    .dark-cta div {
+      width: calc(100% - 2rem);
+    }
+
+    .final-cta {
+      padding-bottom: 1rem;
+      padding-top: 3rem;
+    }
+  }
+</style>

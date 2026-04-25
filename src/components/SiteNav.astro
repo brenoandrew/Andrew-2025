@@ -1,0 +1,427 @@
+---
+import { navigation, profile } from "../lib/profile";
+
+const pathname = Astro.url.pathname;
+
+const isActive = (href: string) => {
+  if (href === "/") return pathname === "/";
+  if (href.startsWith("/#")) return false;
+  return pathname === href || pathname.startsWith(`${href}/`);
+};
+---
+
+<header class="site-header">
+  <nav aria-label="Main navigation" class="site-nav">
+    <a class="brand" href="/" aria-label="Andrew Henrice home">
+      <span class="brand-mark">AH</span>
+      <span class="brand-name">{profile.name}</span>
+    </a>
+    <div class="nav-links">
+      {
+        navigation
+          .filter((item) => item.href !== "/contact")
+          .map((item) => (
+          <a
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class:list={["nav-link", { active: isActive(item.href) }]}
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+    <div class="nav-actions">
+      <button
+        aria-label="Switch to dark mode"
+        class="theme-toggle"
+        data-theme-toggle
+        title="Switch to dark mode"
+        type="button"
+      >
+        <span aria-hidden="true" class="theme-toggle-thumb"></span>
+      </button>
+      <a class="contact-link" href="/contact">Book a call</a>
+      <button
+        aria-controls="site-mobile-menu"
+        aria-expanded="false"
+        aria-label="Open navigation menu"
+        class="menu-toggle"
+        data-menu-toggle
+        type="button"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu" hidden id="site-mobile-menu">
+    <nav aria-label="Mobile navigation" class="mobile-menu-inner">
+      {
+        navigation.map((item) => (
+          <a
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class:list={["mobile-menu-link", { active: isActive(item.href) }]}
+            href={item.href}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  (() => {
+    const lightColor = "#f4f1eb";
+    const darkColor = "#101010";
+    const menuButton = document.querySelector("[data-menu-toggle]");
+    const mobileMenu = document.querySelector("#site-mobile-menu");
+
+    const getTheme = () =>
+      document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+
+    const applyTheme = (theme) => {
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+
+      const themeColor = document.querySelector("#theme-color-meta");
+      if (themeColor) {
+        themeColor.setAttribute(
+          "content",
+          theme === "dark" ? darkColor : lightColor
+        );
+      }
+
+      document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+        const nextTheme = theme === "dark" ? "light" : "dark";
+        const label = `Switch to ${nextTheme} mode`;
+        button.setAttribute("aria-label", label);
+        button.setAttribute("title", label);
+      });
+
+      window.dispatchEvent(new CustomEvent("themechange", { detail: { theme } }));
+    };
+
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextTheme = getTheme() === "dark" ? "light" : "dark";
+        try {
+          localStorage.setItem("theme", nextTheme);
+        } catch {
+          // The UI can still switch even when storage is unavailable.
+        }
+        applyTheme(nextTheme);
+      });
+    });
+
+    applyTheme(getTheme());
+
+    if (!menuButton || !mobileMenu) return;
+
+    const setMenuOpen = (isOpen) => {
+      menuButton.setAttribute("aria-expanded", String(isOpen));
+      menuButton.setAttribute(
+        "aria-label",
+        isOpen ? "Close navigation menu" : "Open navigation menu"
+      );
+      mobileMenu.hidden = !isOpen;
+    };
+
+    menuButton.addEventListener("click", () => {
+      const isOpen = menuButton.getAttribute("aria-expanded") === "true";
+      setMenuOpen(!isOpen);
+    });
+
+    mobileMenu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setMenuOpen(false));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (
+        menuButton.getAttribute("aria-expanded") === "true" &&
+        target instanceof Node &&
+        !mobileMenu.contains(target) &&
+        !menuButton.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    });
+  })();
+</script>
+
+<style>
+  .site-header {
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 40;
+  }
+
+  .site-nav {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0.72rem 1rem;
+    width: 100%;
+  }
+
+  .brand {
+    align-items: center;
+    color: var(--ink);
+    display: inline-flex;
+    gap: 0.55rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .brand-mark {
+    align-items: center;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    display: inline-flex;
+    font-family: "CabinetGrotesk", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 800;
+    height: 1.75rem;
+    justify-content: center;
+    width: 1.75rem;
+  }
+
+  .brand-name {
+    font-family: "CabinetGrotesk", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.35rem;
+    justify-content: flex-end;
+    overflow-x: auto;
+  }
+
+  .nav-link {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--ink-muted);
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    line-height: 1;
+    padding: 0.48rem 0.64rem;
+    text-decoration: none;
+    transition:
+      border-color 160ms ease,
+      color 160ms ease,
+      background 160ms ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    background: var(--surface-hover);
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+
+  .nav-actions {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.85rem;
+  }
+
+  .theme-toggle {
+    align-items: center;
+    background: var(--toggle-track);
+    border: 1px solid var(--toggle-border);
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    height: 1.28rem;
+    padding: 0.15rem;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease;
+    width: 2.35rem;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--ink);
+  }
+
+  .theme-toggle-thumb {
+    background: var(--toggle-thumb);
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px var(--toggle-thumb-ring);
+    display: block;
+    height: 0.88rem;
+    transition:
+      background 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+    width: 0.88rem;
+  }
+
+  :global(:root[data-theme="dark"]) .theme-toggle-thumb {
+    transform: translateX(1.04rem);
+  }
+
+  .contact-link {
+    border-bottom: 1px solid var(--ink);
+    color: var(--ink);
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding-bottom: 0.12rem;
+    text-decoration: none;
+  }
+
+  .menu-toggle {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    color: var(--ink);
+    cursor: pointer;
+    display: none;
+    height: 2.5rem;
+    justify-content: center;
+    padding: 0;
+    width: 2.5rem;
+  }
+
+  .menu-toggle span {
+    background: currentColor;
+    border-radius: 999px;
+    display: block;
+    height: 1px;
+    position: absolute;
+    transition:
+      transform 160ms ease,
+      opacity 160ms ease;
+    width: 1rem;
+  }
+
+  .menu-toggle span:first-child {
+    transform: translateY(-0.22rem);
+  }
+
+  .menu-toggle span:last-child {
+    transform: translateY(0.22rem);
+  }
+
+  .menu-toggle[aria-expanded="true"] span:first-child {
+    transform: rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded="true"] span:last-child {
+    transform: rotate(-45deg);
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .mobile-menu[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .site-nav {
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1rem;
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .nav-actions {
+      gap: 0.5rem;
+      justify-content: end;
+    }
+
+    .brand-name {
+      display: none;
+    }
+
+    .contact-link {
+      display: none;
+    }
+
+    .theme-toggle {
+      min-height: 2.5rem;
+      width: 3.2rem;
+      justify-content: flex-start;
+    }
+
+    :global(:root[data-theme="dark"]) .theme-toggle-thumb {
+      transform: translateX(1.78rem);
+    }
+
+    .menu-toggle {
+      display: inline-flex;
+      position: relative;
+    }
+
+    .mobile-menu {
+      animation: menu-slide-down 160ms ease;
+      background: var(--header-bg);
+      border-top: 1px solid var(--line);
+      display: block;
+      padding: 0 1rem 1rem;
+    }
+
+    .mobile-menu-inner {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0 auto;
+      max-width: 72rem;
+    }
+
+    .mobile-menu-link {
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      display: flex;
+      min-height: 2.75rem;
+      padding: 0.72rem 0.85rem;
+      text-decoration: none;
+    }
+
+    .mobile-menu-link.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--on-ink);
+      font-weight: 800;
+    }
+
+    @keyframes menu-slide-down {
+      from {
+        opacity: 0;
+        transform: translateY(-0.35rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+</style>

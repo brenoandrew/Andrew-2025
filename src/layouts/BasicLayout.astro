@@ -1,63 +1,71 @@
 ---
-import { LINKS } from "../lib/constants";
+import { profile } from "../lib/profile";
+import SiteFooter from "../components/SiteFooter.astro";
 
 interface Props {
   title: string;
   description: string;
-  page?: "travel" | "blog";
+  page?: "travel" | "blog" | "blog-post" | "photography";
   slug?: string | undefined;
-  pubDate?: string;
+  pubDate?: string | Date;
+  image?: string;
 }
 
-const { title, description, page, pubDate } = Astro.props;
-const image =
-  page === "travel"
-    ? `${Astro.url.origin}/globe_preview.webp"`
-    : `${Astro.url.origin}/og-image.png`;
+const { title, description, page, slug, pubDate, image } = Astro.props;
+const defaultImage = page === "travel" ? "/globe_preview.png" : "/og-image.png";
+const imagePath = image || defaultImage;
+const imageUrl = imagePath.startsWith("http")
+  ? imagePath
+  : `${Astro.url.origin}${imagePath}`;
+const canonicalUrl = slug
+  ? new URL(slug.startsWith("/") ? slug : `/${slug}`, Astro.url.origin).href
+  : Astro.url.href;
+const ogType = page === "blog-post" ? "article" : "website";
 
 const schema =
-  page !== "blog"
+  page !== "blog-post"
     ? {
-        "@context": "http://schema.org",
+        "@context": "https://schema.org",
         "@type": "Person",
-        name: "Andrew Henrice",
+        name: profile.name,
         url: Astro.url.origin,
-        sameAs: [LINKS.linkedin, LINKS.github],
+        sameAs: profile.sameAs,
         image: `${Astro.url.origin}/og-image.png`,
-        jobTitle: "CEO & Founder ",
+        jobTitle: profile.shortRole,
         worksFor: {
           "@type": "Organization",
-          name: "Self-Employed",
+          name: profile.companyName,
+          url: profile.companyUrl,
           address: {
             "@type": "PostalAddress",
-            addressLocality: "Italy",
-            addressCountry: "IT",
+            addressLocality: profile.location,
+            addressCountry: "KR",
           },
         },
         nationality: {
           "@type": "Country",
-          name: "Italy",
+          name: profile.origin,
         },
       }
     : {
-        "@context": "http://schema.org",
+        "@context": "https://schema.org",
         "@type": "BlogPosting",
         mainEntityOfPage: {
           "@type": "WebPage",
-          "@id": Astro.url.href,
+          "@id": canonicalUrl,
         },
-        headline: title || title,
+        headline: title,
         description: description || title,
-        image: `${Astro.url.origin}/og-image.png`, //TODO: dynamic
+        image: imageUrl,
         author: {
           "@type": "Person",
-          name: "Andrew Henrice",
+          name: profile.name,
           url: Astro.url.origin,
-          sameAs: [LINKS.linkedin, LINKS.github],
+          sameAs: profile.sameAs,
         },
         publisher: {
           "@type": "Organization",
-          name: "Andrew Henrice",
+          name: profile.name,
           logo: {
             "@type": "ImageObject",
             url: `${Astro.url.origin}/og-image.png`,
@@ -78,41 +86,125 @@ const schema =
     <title>{title}</title>
     <meta content={description} name="description" />
     <meta content="index, follow" name="robots" />
-    <!-- Basic OG tags for sharing your website's content on platforms like Facebook and LinkedIn -->
     <meta content={title} property="og:title" />
     <meta content={description} property="og:description" />
-    <meta content="website" property="og:type" />
-    <meta content={Astro.url.origin} property="og:url" />
-    <meta
-      content={image || `${Astro.url.origin}/og-image.png`}
-      property="og:image"
-    />
-    <!-- Basic Twitter Card tags -->
+    <meta content={ogType} property="og:type" />
+    <meta content={canonicalUrl} property="og:url" />
+    <meta content={imageUrl} property="og:image" />
+    <meta content="#f4f1eb" id="theme-color-meta" name="theme-color" />
     <meta content="summary_large_image" name="twitter:card" />
     <meta content={title} name="twitter:title" />
     <meta content={description} name="twitter:description" />
-    <meta
-      content={image || `${Astro.url.origin}/og-image.png`}
-      name="twitter:image"
-    />
+    <meta content={imageUrl} name="twitter:image" />
 
-    <link href="https://cdn.fontshare.com" rel="preconnect" />
-    <link href={Astro.url.href} rel="canonical" />
+    <link href={canonicalUrl} rel="canonical" />
     <script
       is:inline
       set:html={JSON.stringify(schema)}
       type="application/ld+json"
     />
+    <script is:inline>
+      (() => {
+        const lightColor = "#f4f1eb";
+        const darkColor = "#101010";
+
+        const resolveTheme = () => {
+          try {
+            const storedTheme = localStorage.getItem("theme");
+            if (storedTheme === "light" || storedTheme === "dark") {
+              return storedTheme;
+            }
+          } catch {
+            // Ignore storage access failures and fall back to the system theme.
+          }
+
+          return window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        };
+
+        const theme = resolveTheme();
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+
+        const themeColor = document.querySelector("#theme-color-meta");
+        if (themeColor) {
+          themeColor.setAttribute(
+            "content",
+            theme === "dark" ? darkColor : lightColor
+          );
+        }
+      })();
+    </script>
   </head>
-  <body
-    class="bg-darkslate-700 md:h-screen flex flex-col justify-center items-center"
-  >
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
     <slot name="loader" />
     <slot />
+    <SiteFooter />
   </body>
 </html>
 
 <style is:global>
+  :root {
+    color-scheme: light;
+    --paper: #f4f1eb;
+    --paper-soft: #ebe7df;
+    --surface: #ffffff;
+    --surface-soft: #f8f6f1;
+    --surface-hover: #ffffff;
+    --ink: #151515;
+    --ink-muted: #5f5b54;
+    --line: rgba(21, 21, 21, 0.12);
+    --line-strong: rgba(21, 21, 21, 0.24);
+    --inverse: #171717;
+    --inverse-ink: #f8f6f1;
+    --inverse-muted: #d8d4cc;
+    --inverse-line: rgba(248, 246, 241, 0.12);
+    --header-bg: #f4f1eb;
+    --toggle-track: #f4f1eb;
+    --toggle-border: rgba(21, 21, 21, 0.28);
+    --toggle-thumb: #151515;
+    --toggle-thumb-ring: rgba(21, 21, 21, 0.12);
+    --on-ink: #ffffff;
+    --globe-ocean: #ffffff;
+    --globe-land: #f8f6f1;
+    --globe-visited: #151515;
+    --globe-line: #151515;
+    --media-filter: none;
+    --accent: #d96f4d;
+    --sage: #aeb8aa;
+    --radius: 8px;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #101010;
+    --paper-soft: #171717;
+    --surface: #1d1d1d;
+    --surface-soft: #151515;
+    --surface-hover: #242424;
+    --ink: #f4f1eb;
+    --ink-muted: #b7b0a5;
+    --line: rgba(244, 241, 235, 0.13);
+    --line-strong: rgba(244, 241, 235, 0.28);
+    --inverse: #050505;
+    --inverse-ink: #f4f1eb;
+    --inverse-muted: #b7b0a5;
+    --inverse-line: rgba(244, 241, 235, 0.16);
+    --header-bg: #101010;
+    --toggle-track: #101010;
+    --toggle-border: rgba(244, 241, 235, 0.32);
+    --toggle-thumb: #f4f1eb;
+    --toggle-thumb-ring: rgba(244, 241, 235, 0.14);
+    --on-ink: #101010;
+    --globe-ocean: #1d1d1d;
+    --globe-land: #101010;
+    --globe-visited: #f4f1eb;
+    --globe-line: #b7b0a5;
+    --media-filter: brightness(0.78) contrast(1.08) saturate(0.82);
+  }
+
   @font-face {
     font-family: "CabinetGrotesk";
     src: url("/fonts/CabinetGrotesk-Variable.ttf") format("truetype-variations");
@@ -131,9 +223,27 @@ const schema =
   }
 
   body {
+    background: var(--paper);
+    color: var(--ink);
     margin: 0;
     font-family: "Satoshi", sans-serif;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  html {
+    overflow-x: hidden;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    min-width: 0;
   }
 
   h1,
@@ -142,13 +252,65 @@ const schema =
   h4,
   h5,
   h6 {
-    font-family: "Cabinet Grotesk", sans-serif;
+    font-family: "CabinetGrotesk", sans-serif;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    text-wrap: balance;
   }
+
   p {
     font-family: "Satoshi";
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   b {
     font-weight: 700 !important;
+  }
+
+  a {
+    color: inherit;
+    overflow-wrap: anywhere;
+  }
+
+  img,
+  svg,
+  canvas,
+  video {
+    max-width: 100%;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+  }
+
+  .skip-link {
+    background: var(--ink);
+    border-radius: 8px;
+    color: var(--paper);
+    left: 1rem;
+    padding: 0.65rem 0.9rem;
+    position: fixed;
+    top: 1rem;
+    transform: translateY(-150%);
+    transition: transform 160ms ease;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.001ms !important;
+    }
   }
 </style>

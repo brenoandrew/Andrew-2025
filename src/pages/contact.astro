@@ -1,0 +1,252 @@
+---
+import BasicLayout from "../layouts/BasicLayout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import { profile } from "../lib/profile";
+---
+
+<BasicLayout
+  description="Contact Andrew Henrice for projects, collaborations, writing, photography, or a friendly hello."
+  title="Andrew Henrice - Contact"
+>
+  <SiteNav />
+  <main id="content">
+    <section class="contact-hero">
+      <div class="contact-copy">
+        <p class="kicker">Contact</p>
+        <h1>Let's start with a good conversation.</h1>
+        <p>
+          Send a note about a project, collaboration, trip, photo, or idea that
+          has been sitting in the back of your mind.
+        </p>
+      </div>
+
+      <div class="contact-panel" aria-label="Contact options">
+        <a class="primary-contact" href={profile.emailHref}>
+          <span>Email</span>
+          <strong>{profile.email}</strong>
+        </a>
+        <div class="detail-grid">
+          <div>
+            <span>Based in</span>
+            <strong>{profile.location}</strong>
+          </div>
+          <div>
+            <span>Open to</span>
+            <strong>Projects, writing, photography, and collaborations</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="link-section" aria-labelledby="social-title">
+      <div>
+        <p class="kicker">Elsewhere</p>
+        <h2 id="social-title">Find me around the web.</h2>
+      </div>
+      <div class="social-links">
+        <a href={profile.links.github} rel="noopener noreferrer" target="_blank">
+          <span>GitHub</span>
+          <small>Code, experiments, and public work</small>
+        </a>
+        <a href={profile.links.linkedin} rel="noopener noreferrer" target="_blank">
+          <span>LinkedIn</span>
+          <small>Professional profile and updates</small>
+        </a>
+        <a href={profile.links.instagram} rel="noopener noreferrer" target="_blank">
+          <span>Instagram</span>
+          <small>Photos, trips, and small visual notes</small>
+        </a>
+        <a href={profile.links.twitter} rel="noopener noreferrer" target="_blank">
+          <span>Twitter</span>
+          <small>Short thoughts and links</small>
+        </a>
+      </div>
+    </section>
+  </main>
+</BasicLayout>
+
+<style>
+  main {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 1rem 2rem;
+    width: 100%;
+  }
+
+  .contact-hero {
+    align-items: end;
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+    padding: 5rem 0;
+  }
+
+  .kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 8vw, 6.4rem);
+    font-weight: 500;
+    line-height: 0.9;
+    max-width: 10ch;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 500;
+    line-height: 0.95;
+    margin-top: 0.55rem;
+  }
+
+  .contact-copy p:not(.kicker) {
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-top: 1.25rem;
+    max-width: 42rem;
+  }
+
+  .contact-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .primary-contact,
+  .detail-grid > div,
+  .social-links a {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: grid;
+    gap: 0.35rem;
+    padding: 1rem;
+    text-decoration: none;
+  }
+
+  .primary-contact {
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .primary-contact span,
+  .detail-grid span {
+    color: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+
+  .primary-contact strong,
+  .detail-grid strong {
+    font-size: 1.05rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .detail-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .detail-grid span,
+  .social-links small {
+    color: var(--ink-muted);
+  }
+
+  .link-section {
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    padding-top: 4rem;
+  }
+
+  .social-links {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .social-links a {
+    background: var(--surface);
+    color: var(--ink);
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .social-links a:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+  }
+
+  .social-links span {
+    font-weight: 900;
+  }
+
+  @media (max-width: 760px) {
+    main {
+      padding-bottom: 1.5rem;
+    }
+
+    .contact-hero,
+    .link-section {
+      grid-template-columns: 1fr;
+    }
+
+    .contact-hero {
+      align-items: start;
+      gap: 1.5rem;
+      padding: 2.75rem 0 3.5rem;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      line-height: 0.94;
+      max-width: 11ch;
+    }
+
+    h2 {
+      font-size: 2.25rem;
+    }
+
+    .contact-copy p:not(.kicker) {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-top: 1rem;
+    }
+
+    .contact-panel {
+      padding: 1rem;
+      width: 100%;
+    }
+
+    .primary-contact,
+    .detail-grid > div,
+    .social-links a {
+      min-height: 4.4rem;
+      padding: 0.95rem;
+    }
+
+    .primary-contact strong,
+    .detail-grid strong {
+      font-size: 1rem;
+    }
+
+    .link-section {
+      gap: 1.5rem;
+      padding-top: 3rem;
+    }
+  }
+</style>

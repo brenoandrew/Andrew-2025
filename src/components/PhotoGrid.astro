@@ -1,0 +1,115 @@
+---
+import type { Photo } from "../lib/photography";
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+
+const imageDimensions = (photo: Photo) => ({
+  height: photo.height,
+  width: photo.width,
+});
+---
+
+{
+  photos.length > 0 ? (
+    <div class="photo-grid">
+      {photos.map((photo, index) => (
+        <figure class="photo-item">
+          <img
+            alt={photo.alt}
+            decoding="async"
+            {...imageDimensions(photo)}
+            loading={index < 2 ? "eager" : "lazy"}
+            src={photo.src}
+          />
+          {(photo.title || photo.country) && (
+            <figcaption>
+              {photo.title && <span>{photo.title}</span>}
+              {photo.country && <small>{photo.country}</small>}
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  ) : (
+    <p class="empty-gallery">
+      Trip photos will live here as the archive grows.
+    </p>
+  )
+}
+
+<style>
+  .photo-grid {
+    column-count: 1;
+    column-gap: 1.1rem;
+  }
+
+  .photo-item {
+    break-inside: avoid;
+    margin: 0 0 1.1rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .photo-item img {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    display: block;
+    filter: var(--media-filter);
+    height: auto;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .photo-item figcaption {
+    color: var(--ink);
+    display: grid;
+    font-size: 0.9rem;
+    gap: 0.1rem;
+    margin-top: 0.45rem;
+  }
+
+  .photo-item figcaption small {
+    color: var(--ink-muted);
+    font-size: 0.78rem;
+  }
+
+  .empty-gallery {
+    background: var(--surface);
+    border: 1px dashed var(--line-strong);
+    border-radius: 8px;
+    color: var(--ink-muted);
+    margin: 0;
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 639px) {
+    .photo-grid {
+      column-gap: 0;
+    }
+
+    .photo-item {
+      margin-bottom: 1rem;
+    }
+
+    .empty-gallery {
+      padding: 1rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .photo-grid {
+      column-count: 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .photo-grid {
+      column-count: 3;
+    }
+  }
+</style>

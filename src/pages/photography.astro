@@ -1,0 +1,126 @@
+---
+import BasicLayout from "../layouts/BasicLayout.astro";
+import PhotoGrid from "../components/PhotoGrid.astro";
+import SiteNav from "../components/SiteNav.astro";
+import {
+  galleryPhotos,
+  hasTripPhotos,
+  tripPhotoFolder,
+} from "../lib/photography";
+---
+
+<BasicLayout
+  description="Trip photos, places, and small moments from Andrew Henrice's travels."
+  page="photography"
+  title="Andrew Henrice - Photography"
+>
+  <SiteNav />
+  <main id="content">
+    <section class="page-hero">
+      <p class="kicker">Photography</p>
+      <h1>Places, light, and small moments from the road.</h1>
+      <p>
+        A visual journal for the streets, skies, meals, stations, coastlines,
+        and quiet corners that stay with me after a trip ends.
+      </p>
+      {
+        !hasTripPhotos && (
+          <p class="note">
+            The trip archive is ready. Add selected photos to {tripPhotoFolder}
+            when the first set is ready.
+          </p>
+        )
+      }
+    </section>
+
+    <section class="gallery-section" aria-label="Photography gallery">
+      <PhotoGrid photos={galleryPhotos} />
+    </section>
+  </main>
+</BasicLayout>
+
+<style>
+  main {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 1rem 2rem;
+    width: 100%;
+  }
+
+  .page-hero {
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    padding: 5rem 0 3rem;
+  }
+
+  .kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 7vw, 5.4rem);
+    font-weight: 500;
+    line-height: 0.92;
+  }
+
+  p {
+    align-self: end;
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 44rem;
+  }
+
+  .note {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    grid-column: 2;
+    padding: 1rem;
+  }
+
+  .gallery-section {
+    padding-top: 2rem;
+  }
+
+  @media (max-width: 760px) {
+    main {
+      padding-bottom: 1.5rem;
+    }
+
+    .page-hero {
+      gap: 1rem;
+      grid-template-columns: 1fr;
+      padding: 2.75rem 0 2.25rem;
+    }
+
+    h1 {
+      font-size: 2.9rem;
+      line-height: 0.95;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .note {
+      grid-column: auto;
+      padding: 0.9rem;
+    }
+
+    .gallery-section {
+      padding-top: 1.75rem;
+    }
+  }
+</style>

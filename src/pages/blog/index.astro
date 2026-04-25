@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import PostRow from "../../components/Blog/PostRow.astro";
+import SiteNav from "../../components/SiteNav.astro";
 
 const posts = (await getCollection("blog"))?.sort(
   (blogEntryA, blogEntryB) =>
@@ -10,34 +11,107 @@ const posts = (await getCollection("blog"))?.sort(
 );
 ---
 
-<script>
-  import { animate, type AnimationSequence } from "motion";
-  import { loaderAnimation } from "../../lib/constants";
-
-  const sequence = [loaderAnimation];
-
-  animate(sequence as AnimationSequence);
-</script>
-
 <Layout
-  description="Software developer with strong focus on the user experience animations and micro interactions"   title="Andrew Henrice - Blog"
+  description="Writing from Andrew Henrice about software, travel, ideas, and building Dawn Labs & Dawn Web."
+  page="blog"
+  title="Andrew Henrice - Blog"
 >
-  <main
-    class="w-screen h-screen flex flex-col justify-start items-start max-w-3xl mx-auto p-8"
-  >
-    <a
-      class="text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 mb-8 border-1 border-solid border-neutral-600 rounded-lg"       href="/"
-      >Back</a
-    >
-    <h1 class="text-4xl font-bold mb-4 text-neutral-100">Posts</h1>
-    <ul class="w-full">
-      {
-        posts?.map((post) => (
-          <PostRow
-            date={post.data.pubDate || new Date()}             id={post.id}             title={post.data.title || "No title"}
-          />
-        ))
-      }
-    </ul>
+  <SiteNav />
+  <main id="content">
+    <section class="blog-hero">
+      <p class="kicker">Blog</p>
+      <h1>Notes from the build.</h1>
+      <p>
+        Writing about software, business, travel, and the ideas that keep
+        showing up.
+      </p>
+    </section>
+    <section class="post-section" aria-label="Blog posts">
+      <ul>
+        {
+          posts?.map((post) => (
+            <PostRow
+              date={post.data.pubDate || new Date()}
+              id={post.id}
+              title={post.data.title || "No title"}
+            />
+          ))
+        }
+      </ul>
+    </section>
   </main>
 </Layout>
+
+<style>
+  main {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 0 1rem 2rem;
+    width: 100%;
+  }
+
+  .blog-hero {
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    padding: 5rem 0 3rem;
+  }
+
+  .kicker {
+    font-size: 0.78rem;
+    font-weight: 800;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 6rem);
+    font-weight: 500;
+    line-height: 0.9;
+  }
+
+  p {
+    align-self: end;
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    max-width: 40rem;
+  }
+
+  .post-section {
+    padding-top: 2rem;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (max-width: 760px) {
+    main {
+      padding-bottom: 1.5rem;
+    }
+
+    .blog-hero {
+      gap: 1rem;
+      grid-template-columns: 1fr;
+      padding: 2.75rem 0 2.25rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 0.95;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+  }
+</style>

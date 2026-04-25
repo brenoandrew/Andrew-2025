@@ -1,6 +1,7 @@
 ---
 import { formatDate } from "../lib/helpers";
 import BasicLayout from "./BasicLayout.astro";
+import SiteNav from "../components/SiteNav.astro";
 
 type Props = {
   title: string;
@@ -13,21 +14,212 @@ type Props = {
 const { title, description, pubDate, minutesRead, url } = Astro.props;
 ---
 
-<BasicLayout description={description} page="blog" slug={url} title={title}>
-  <main class="mx-auto max-w-3xl w-full h-screen p-8 text-neutral-100">
-    <a
-      class="text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 border-1 border-solid border-neutral-600 rounded-lg mb-8"       href="/blog"
-      >Back</a
-    >
-    <div class="my-10">
-      <h1 class="text-5xl font-semibold">{title}</h1>
-      <div class="flex justify-between pt-4 text-gray-500 text-sm">
-        <p>{formatDate(pubDate)}</p>
-        <p>{minutesRead}</p>
+<BasicLayout
+  description={description}
+  page="blog-post"
+  pubDate={pubDate}
+  slug={url}
+  title={`${title} | Andrew Henrice`}
+>
+  <SiteNav />
+  <main id="content">
+    <a class="back-link" href="/blog">Back to blog</a>
+    <header class="post-hero">
+      <h1>{title}</h1>
+      <div>
+        <p>{description}</p>
+        <dl>
+          <div>
+            <dt>Date</dt>
+            <dd>{formatDate(pubDate)}</dd>
+          </div>
+          <div>
+            <dt>Read</dt>
+            <dd>{minutesRead}</dd>
+          </div>
+        </dl>
       </div>
-    </div>
-    <article class="prose prose-p:text-red-500 prose-slate prose-invert">
+    </header>
+    <article class="article-content">
       <slot />
     </article>
   </main>
 </BasicLayout>
+
+<style>
+  main {
+    margin: 0 auto;
+    max-width: 72rem;
+    padding: 3rem 1rem 2rem;
+    width: 100%;
+  }
+
+  .back-link {
+    border-bottom: 1px solid currentColor;
+    display: inline-flex;
+    font-size: 0.86rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-decoration: none;
+  }
+
+  .post-hero {
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
+    padding-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 8vw, 6rem);
+    font-weight: 500;
+    line-height: 0.9;
+    margin: 0;
+  }
+
+  .post-hero p {
+    color: var(--ink-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  dl {
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0;
+    padding-top: 1rem;
+  }
+
+  dl div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  dt,
+  dd {
+    font-size: 0.86rem;
+    margin: 0;
+  }
+
+  dt {
+    color: var(--ink-muted);
+  }
+
+  dd {
+    font-weight: 800;
+  }
+
+  .article-content {
+    color: var(--ink);
+    font-size: 1.08rem;
+    line-height: 1.78;
+    margin: 3rem auto 0;
+    max-width: 46rem;
+  }
+
+  .article-content :global(h1),
+  .article-content :global(h2),
+  .article-content :global(h3),
+  .article-content :global(h4),
+  .article-content :global(h5),
+  .article-content :global(h6) {
+    color: var(--ink);
+    font-weight: 700;
+    margin: 2rem 0 0.75rem;
+  }
+
+  .article-content :global(h1) {
+    font-size: 2rem;
+  }
+
+  .article-content :global(h2) {
+    font-size: 1.75rem;
+  }
+
+  .article-content :global(h3) {
+    font-size: 1.45rem;
+  }
+
+  .article-content :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .article-content :global(a) {
+    color: var(--ink);
+    font-weight: 800;
+  }
+
+  .article-content :global(ul),
+  .article-content :global(ol) {
+    margin: 0 0 1rem 1.25rem;
+    padding: 0;
+  }
+
+  .article-content :global(blockquote) {
+    border-left: 3px solid var(--ink);
+    color: var(--ink-muted);
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+  }
+
+  .article-content :global(pre) {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+    padding: 1rem;
+  }
+
+  .article-content :global(code) {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink);
+    padding: 0.15rem 0.3rem;
+  }
+
+  .article-content :global(img) {
+    border-radius: 8px;
+    height: auto;
+    max-width: 100%;
+  }
+
+  @media (max-width: 760px) {
+    main {
+      padding: 2rem 1rem 1.5rem;
+    }
+
+    .post-hero {
+      gap: 1.25rem;
+      grid-template-columns: 1fr;
+      padding-bottom: 2.25rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 0.95;
+    }
+
+    .post-hero p {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    dl div {
+      gap: 1rem;
+    }
+
+    dd {
+      text-align: right;
+    }
+
+    .article-content {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-top: 2.25rem;
+    }
+  }
+</style>
